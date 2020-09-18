@@ -266,6 +266,18 @@ let test_default _ctxt =
   assert_roundtrip pp_default default_to_yojson default_of_yojson
                    { def = 42 } "{}"
 
+module Monomorphic = struct
+  let (=) : int -> int -> bool = Stdlib.(=)
+   
+  type default = {
+    def : bool [@default true];
+  } [@@deriving yojson, show]
+
+  let test_monomorphic_eq_default _ctxt =
+    assert_roundtrip pp_default default_to_yojson default_of_yojson
+                     { def = true } "{}"
+end
+  
 type bidi = int [@@deriving show, to_yojson, of_yojson]
 let test_bidi _ctxt =
   assert_roundtrip pp_bidi bidi_to_yojson bidi_of_yojson
@@ -542,6 +554,7 @@ let suite = "Test ppx_yojson" >::: [
     "test_custpvar"  >:: test_custpvar;
     "test_field_err" >:: test_field_err;
     "test_default"   >:: test_default;
+    "test_default2"  >:: Monomorphic.test_monomorphic_eq_default;
     "test_bidi"      >:: test_bidi;
     "test_custom"    >:  CustomConversions.suite;
     "test_shortcut"  >:: test_shortcut;
